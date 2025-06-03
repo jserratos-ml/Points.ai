@@ -1000,7 +1000,23 @@
             const card = document.getElementById(`partner-${partner.code}`);
 
             try {
-                const results = await generateDynamicResults(partner, origin, destination, departDate, cabinClass);
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        partnerCode: partner.code,
+                        origin,
+                        destination,
+                        date: departDate,
+                        cabin: cabinClass
+                    })
+                });
+
+                if (!response.ok) throw new Error('Request failed');
+                const data = await response.json();
+                const results = data.results || [];
 
                 if (results.length > 0) {
                     updatePartnerCard(card, partner, results, 'success');
@@ -1019,133 +1035,6 @@
             }
         }
 
-        async function generateDynamicResults(partner, origin, destination, date, cabin) {
-            // In production, this would call actual airline APIs
-            // For demo, we'll create realistic results based on route characteristics
-            
-            const routeDistance = calculateRouteDistance(origin, destination);
-            const isPopularRoute = checkPopularRoute(origin, destination);
-            const isDomestic = checkDomestic(origin, destination);
-            
-            // Availability varies by partner and route
-            const availabilityChance = {
-                'DL': isDomestic ? 0.8 : 0.6,
-                'AF': !isDomestic ? 0.7 : 0.3,
-                'BA': 0.6,
-                'VS': !isDomestic ? 0.5 : 0.2,
-                'EK': routeDistance > 3000 ? 0.6 : 0.1,
-                'SQ': routeDistance > 2000 ? 0.7 : 0.3,
-                'AC': 0.5,
-                'AV': 0.6,
-                'CX': routeDistance > 2000 ? 0.6 : 0.3,
-                'EY': routeDistance > 3000 ? 0.5 : 0.2,
-                'B6': isDomestic ? 0.7 : 0.4,
-                'HA': origin.includes('HI') || destination.includes('HI') ? 0.9 : 0.3
-            };
-            
-            const hasAvailability = Math.random() < (availabilityChance[partner.code] || 0.5);
-            
-            if (!hasAvailability) return [];
-            
-            // Calculate points based on distance and cabin
-            const basePoints = {
-                economy: Math.round(routeDistance * 5 + 5000),
-                business: Math.round(routeDistance * 12 + 20000),
-                first: Math.round(routeDistance * 20 + 40000)
-            };
-            
-            // Partner-specific adjustments
-            const partnerMultipliers = {
-                'DL': 1.2,  // Delta typically higher
-                'AF': 0.8,  // Flying Blue good value
-                'BA': isDomestic ? 0.7 : 1.3,  // BA good for short haul
-                'VS': 0.9,
-                'AV': 0.75, // LifeMiles good value
-                'B6': 1.1
-            };
-            
-            const multiplier = partnerMultipliers[partner.code] || 1;
-            const points = Math.round(basePoints[cabin] * multiplier);
-            
-            // Adjust for transfer ratio
-            const adjustedPoints = partner.ratio === "1.25:1" ? Math.round(points * 0.8) : points;
-            
-            const results = [];
-            
-            // Generate flight options
-            const numOptions = Math.floor(Math.random() * 3) + 1;
-            
-            for (let i = 0; i < numOptions; i++) {
-                const stops = routeDistance < 1000 ? 0 : Math.floor(Math.random() * 2);
-                const availability = isPopularRoute && i === 0 ? 'Limited' : 'Good';
-                
-                results.push({
-                    partner: partner.name,
-                    partnerCode: partner.code,
-                    cabin: cabin.charAt(0).toUpperCase() + cabin.slice(1),
-                    points: adjustedPoints + (i * 5000),
-                    stops: stops,
-                    availability: availability,
-                    aircraft: getAircraftType(routeDistance),
-                    duration: calculateDuration(routeDistance, stops)
-                });
-            }
-            
-            return results;
-        }
-
-        function calculateRouteDistance(origin, destination) {
-            // Simplified distance calculation based on common routes
-            const domesticCodes = ['LAX', 'JFK', 'ORD', 'DFW', 'ATL', 'SFO', 'MIA', 'SEA', 'BOS', 'DEN'];
-            const europeCodes = ['LHR', 'CDG', 'FRA', 'AMS', 'MAD', 'FCO', 'MUC', 'ZRH'];
-            const asiaCodes = ['NRT', 'HKG', 'SIN', 'ICN', 'PVG', 'BKK', 'DEL'];
-            
-            if (domesticCodes.includes(origin) && domesticCodes.includes(destination)) {
-                return Math.floor(Math.random() * 2000) + 500;
-            } else if (
-                (domesticCodes.includes(origin) && europeCodes.includes(destination)) ||
-                (europeCodes.includes(origin) && domesticCodes.includes(destination))
-            ) {
-                return Math.floor(Math.random() * 2000) + 3000;
-            } else if (
-                (domesticCodes.includes(origin) && asiaCodes.includes(destination)) ||
-                (asiaCodes.includes(origin) && domesticCodes.includes(destination))
-            ) {
-                return Math.floor(Math.random() * 3000) + 5000;
-            }
-            
-            return Math.floor(Math.random() * 4000) + 1000;
-        }
-
-        function checkPopularRoute(origin, destination) {
-            const popularRoutes = [
-                'JFK-LHR', 'LAX-NRT', 'SFO-HKG', 'ORD-CDG', 'JFK-CDG',
-                'LAX-SYD', 'SFO-LHR', 'BOS-LHR', 'MIA-GRU', 'JFK-FRA'
-            ];
-            return popularRoutes.includes(`${origin}-${destination}`) || 
-                   popularRoutes.includes(`${destination}-${origin}`);
-        }
-
-        function checkDomestic(origin, destination) {
-            const usCodes = ['LAX', 'JFK', 'ORD', 'DFW', 'ATL', 'SFO', 'MIA', 'SEA', 'BOS', 'DEN', 
-                           'PHX', 'LAS', 'MCO', 'EWR', 'MSP', 'DTW', 'PHL', 'CLT', 'IAH', 'DCA'];
-            return usCodes.includes(origin) && usCodes.includes(destination);
-        }
-
-        function getAircraftType(distance) {
-            if (distance < 1500) return 'A320/B737';
-            if (distance < 3500) return 'A330/B787';
-            return 'A350/B777';
-        }
-
-        function calculateDuration(distance, stops) {
-            const baseHours = distance / 500;
-            const stopTime = stops * 2;
-            const totalHours = baseHours + stopTime;
-            const hours = Math.floor(totalHours);
-            const minutes = Math.round((totalHours - hours) * 60);
-            return `${hours}h ${minutes}m`;
-        }
 
         function updatePartnerCard(card, partner, results, status) {
             card.classList.remove('loading');
