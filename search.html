@@ -12,13 +12,13 @@
         }
 
         :root {
-            --primary-purple: #6366f1;
-            --dark-bg: #1e1b4b;
-            --darker-bg: #0f0a3c;
-            --light-text: #ffffff;
-            --muted-text: #a8a5c9;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --border-color: rgba(255, 255, 255, 0.1);
+            --primary-purple: #555555;
+            --dark-bg: #ffffff;
+            --darker-bg: #f4f4f4;
+            --light-text: #333333;
+            --muted-text: #666666;
+            --card-bg: #ffffff;
+            --border-color: #dddddd;
             --success-green: #10b981;
             --warning-yellow: #f59e0b;
             --error-red: #ef4444;
@@ -37,7 +37,7 @@
             position: fixed;
             top: 0;
             width: 100%;
-            background: rgba(15, 10, 60, 0.95);
+            background: #ffffff;
             backdrop-filter: blur(10px);
             z-index: 1000;
             padding: 20px 0;
@@ -112,7 +112,7 @@
         }
 
         .btn-primary:hover {
-            background: #5558e3;
+            background: #777777;
             transform: translateY(-2px);
         }
 
@@ -136,7 +136,7 @@
             font-weight: 700;
             line-height: 1.2;
             margin-bottom: 24px;
-            background: linear-gradient(135deg, #ffffff 0%, #a8a5c9 100%);
+            background: linear-gradient(135deg, #444444 0%, #888888 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -176,12 +176,11 @@
 
         /* Search Form */
         .search-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 32px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .search-options {
@@ -209,7 +208,7 @@
 
         .option-toggle button.active {
             background: var(--primary-purple);
-            color: white;
+            color: #ffffff;
             border-color: var(--primary-purple);
         }
 
@@ -225,7 +224,7 @@
         .input-group input, .input-group select {
             width: 100%;
             padding: 16px 20px 16px 48px;
-            background: rgba(255, 255, 255, 0.05);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--light-text);
@@ -236,7 +235,7 @@
         .input-group input:focus, .input-group select:focus {
             outline: none;
             border-color: var(--primary-purple);
-            background: rgba(255, 255, 255, 0.08);
+            background: #f7f7f7;
         }
 
         .input-group input::placeholder {
@@ -284,8 +283,8 @@
         }
 
         .results-summary {
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: #f7f7f7;
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 30px;
@@ -320,7 +319,7 @@
         }
 
         .partner-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 24px;
@@ -344,7 +343,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-purple), #a855f7);
+            background: linear-gradient(90deg, var(--primary-purple), #888888);
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -435,7 +434,7 @@
         }
 
         .flight-option {
-            background: rgba(255, 255, 255, 0.02);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 16px;
@@ -444,8 +443,8 @@
         }
 
         .flight-option:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: #f7f7f7;
+            border-color: var(--border-color);
         }
 
         .flight-header {
@@ -509,7 +508,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(15, 10, 60, 0.95);
+            background: rgba(0, 0, 0, 0.5);
             display: none;
             align-items: center;
             justify-content: center;
@@ -1001,22 +1000,7 @@
             const card = document.getElementById(`partner-${partner.code}`);
 
             try {
-                const response = await fetch('/search', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        partnerCode: partner.code,
-                        origin,
-                        destination,
-                        date: departDate
-                    })
-                });
-
-                if (!response.ok) throw new Error('Request failed');
-                const data = await response.json();
-                const results = data.results || [];
+                const results = await generateDynamicResults(partner, origin, destination, departDate, cabinClass);
 
                 if (results.length > 0) {
                     updatePartnerCard(card, partner, results, 'success');
