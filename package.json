@@ -8,8 +8,8 @@
     "test": "echo \"No tests specified\""
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cheerio": "^1.0.0-rc.12"
+    "@duffel/api": "^4.12.2",
+    "express": "^4.18.2"
   },
   "type": "module"
 }
