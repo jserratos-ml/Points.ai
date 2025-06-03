@@ -999,15 +999,25 @@
 
         async function searchPartner(partner, origin, destination, departDate, returnDate) {
             const card = document.getElementById(`partner-${partner.code}`);
-            
+
             try {
-                // Simulate API call with realistic delay
-                const delay = Math.random() * 3000 + 2000; // 2-5 seconds
-                await new Promise(resolve => setTimeout(resolve, delay));
-                
-                // Generate results based on partner and route
-                const results = await generateDynamicResults(partner, origin, destination, departDate, cabinClass);
-                
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        partnerCode: partner.code,
+                        origin,
+                        destination,
+                        date: departDate
+                    })
+                });
+
+                if (!response.ok) throw new Error('Request failed');
+                const data = await response.json();
+                const results = data.results || [];
+
                 if (results.length > 0) {
                     updatePartnerCard(card, partner, results, 'success');
                     searchResults.push(...results);
@@ -1019,7 +1029,7 @@
                 } else {
                     updatePartnerCard(card, partner, [], 'no-availability');
                 }
-                
+
             } catch (error) {
                 updatePartnerCard(card, partner, [], 'error');
             }
