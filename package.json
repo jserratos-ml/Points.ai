@@ -1,0 +1,16 @@
+{
+  "name": "pointsmax-scraper",
+  "version": "1.0.0",
+  "description": "Scrape AMEX partner websites for award availability",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"No tests specified\""
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "type": "module"
+}
