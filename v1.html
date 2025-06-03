@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PointsMax - Live AMEX Transfer Partner Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-purple: #6366f1;
+            --dark-bg: #1e1b4b;
+            --darker-bg: #0f0a3c;
+            --light-text: #ffffff;
+            --muted-text: #a8a5c9;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success-green: #10b981;
+            --warning-yellow: #f59e0b;
+            --error-red: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--darker-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 10, 60, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--light-text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--muted-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--light-text);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            color: var(--light-text);
+            background: transparent;
+            border: 2px solid var(--border-color);
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--light-text);
+        }
+
+        .btn-primary {
+            background: var(--primary-purple);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #5558e3;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 160px 40px 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 56px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #a8a5c9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text p {
+            font-size: 20px;
+            color: var(--muted-text);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* Live Status Indicator */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Search Form */
+        .search-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .option-toggle {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .option-toggle button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--muted-text);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .option-toggle button.active {
+            background: var(--primary-purple);
+            color: white;
+            border-color: var(--primary-purple);
+        }
+
+        .search-inputs {
+            display: grid;
+            gap: 16px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 16px 20px 16px 48px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--light-text);
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-group input::placeholder {
+            color: var(--muted-text);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            opacity: 0.5;
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            margin-top: 8px;
+        }
+
+        .date-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Results Section */
+        .results-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px 80px;
+            display: none;
+        }
+
+        .results-header {
+            margin-bottom: 40px;
+        }
+
+        .results-header h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .results-summary {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-purple);
+        }
+
+        .stat-label {
+            color: var(--muted-text);
+            font-size: 14px;
+        }
+
+        /* Partner Results */
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 24px;
+        }
+
+        .partner-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .partner-card.loading {
+            opacity: 0.6;
+        }
+
+        .partner-card.no-availability {
+            opacity: 0.5;
+        }
+
+        .partner-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-purple), #a855f7);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .partner-card:hover:not(.loading):not(.no-availability) {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .partner-card:hover::before {
+            opacity: 1;
+        }
+
+        .partner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+
+        .partner-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--light-text);
+        }
+
+        .search-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .status-searching {
+            color: var(--warning-yellow);
+        }
+
+        .status-complete {
+            color: var(--success-green);
+        }
+
+        .status-error {
+            color: var(--error-red);
+        }
+
+        .alliance-badge {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-purple);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .transfer-details {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: var(--muted-text);
+        }
+
+        .detail-value {
+            color: var(--light-text);
+            font-weight: 500;
+        }
+
+        .flight-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .flight-option {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .flight-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cabin-class {
+            font-weight: 600;
+            color: var(--light-text);
+        }
+
+        .points-cost {
+            font-size: 20px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        .flight-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--muted-text);
+        }
+
+        .no-flights {
+            text-align: center;
+            padding: 40px;
+            color: var(--muted-text);
+        }
+
+        /* Loading States */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-text {
+            height: 20px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-button {
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 10, 60, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error States */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            color: #fca5a5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-text h1 {
+                font-size: 42px;
+            }
+
+            .partners-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 120px 20px 60px;
+            }
+
+            .search-card {
+                padding: 24px;
+            }
+
+            .hero-text h1 {
+                font-size: 32px;
+            }
+
+            .hero-text p {
+                font-size: 18px;
+            }
+
+            .date-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Gradient Background Effects */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -200px;
+            left: -200px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
+            filter: blur(100px);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">pointsmax</a>
+            <div class="nav-links">
+                <a href="#">Search</a>
+                <a href="#">Transfer Guide</a>
+                <a href="#">Sweet Spots</a>
+                <a href="#">Blog</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="nav-actions">
+                <a href="#" class="btn-secondary">Login</a>
+                <a href="#" class="btn-primary">Sign up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span>Live award search</span>
+                </div>
+                <h1>Real-time AMEX partner award search</h1>
+                <p>Search across all AMEX transfer partners simultaneously. See actual award availability and compare redemption options in real-time.</p>
+                <a href="#" class="btn-primary" style="display: inline-block; margin-top: 20px;">How it works</a>
+            </div>
+            
+            <div class="search-card">
+                <div class="search-options">
+                    <div class="option-toggle">
+                        <button class="active" onclick="setTripType('oneway')">One way</button>
+                        <button onclick="setTripType('roundtrip')">Round trip</button>
+                    </div>
+                    <div class="option-toggle">
+                        <button class="active" onclick="setCabinClass('economy')">Economy</button>
+                        <button onclick="setCabinClass('business')">Business</button>
+                        <button onclick="setCabinClass('first')">First</button>
+                    </div>
+                </div>
+                
+                <form id="searchForm" class="search-inputs">
+                    <div class="input-group">
+                        <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
+                        </svg>
+                        <input type="text" id="origin" placeholder="From (City or Airport Code)" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
+                        </svg>
+                        <input type="text" id="destination" placeholder="To (City or Airport Code)" required>
+                    </div>
+                    
+                    <div class="date-inputs">
+                        <div class="input-group">
+                            <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            <input type="date" id="departDate" placeholder="Departure Date" required>
+                        </div>
+                        
+                        <div class="input-group" id="returnDateGroup" style="display: none;">
+                            <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            <input type="date" id="returnDate" placeholder="Return Date">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary search-btn">
+                        Search all partners
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection">
+        <div class="results-header">
+            <h2>Live Search Results</h2>
+            <div class="results-summary" id="resultsSummary" style="display: none;">
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="partnersSearched">0</div>
+                        <div class="stat-label">Partners Searched</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="flightsFound">0</div>
+                        <div class="stat-label">Available Flights</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="bestValue">-</div>
+                        <div class="stat-label">Best Value (points)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="searchTime">0s</div>
+                        <div class="stat-label">Search Time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="partners-grid" id="partnersGrid">
+            <!-- Results will be populated here -->
+        </div>
+    </section>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Initiating search across all AMEX transfer partners...</p>
+        </div>
+    </div>
+
+    <script>
+        // AMEX Transfer Partners Configuration
+        const amexPartners = [
+            {
+                name: "Delta SkyMiles",
+                code: "DL",
+                ratio: "1:1",
+                alliance: "skyteam",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "delta"
+            },
+            {
+                name: "Air France/KLM Flying Blue",
+                code: "AF",
+                ratio: "1:1",
+                alliance: "skyteam",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "flyingblue"
+            },
+            {
+                name: "British Airways Executive Club",
+                code: "BA",
+                ratio: "1:1",
+                alliance: "oneworld",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "avios"
+            },
+            {
+                name: "Virgin Atlantic Flying Club",
+                code: "VS",
+                ratio: "1:1",
+                alliance: "skyteam",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "virgin"
+            },
+            {
+                name: "Emirates Skywards",
+                code: "EK",
+                ratio: "1:1",
+                alliance: "other",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "emirates"
+            },
+            {
+                name: "Singapore Airlines KrisFlyer",
+                code: "SQ",
+                ratio: "1:1",
+                alliance: "staralliance",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "singapore"
+            },
+            {
+                name: "Air Canada Aeroplan",
+                code: "AC",
+                ratio: "1:1",
+                alliance: "staralliance",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "aeroplan"
+            },
+            {
+                name: "Avianca LifeMiles",
+                code: "AV",
+                ratio: "1:1",
+                alliance: "staralliance",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "lifemiles"
+            },
+            {
+                name: "Cathay Pacific Asia Miles",
+                code: "CX",
+                ratio: "1:1",
+                alliance: "oneworld",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "cathay"
+            },
+            {
+                name: "Etihad Guest",
+                code: "EY",
+                ratio: "1:1",
+                alliance: "other",
+                minimumTransfer: 1000,
+                transferTime: "5 days",
+                searchable: true,
+                api: "etihad"
+            },
+            {
+                name: "JetBlue TrueBlue",
+                code: "B6",
+                ratio: "1.25:1",
+                alliance: "other",
+                minimumTransfer: 250,
+                transferTime: "Instant",
+                searchable: true,
+                api: "jetblue"
+            },
+            {
+                name: "Hawaiian Airlines",
+                code: "HA",
+                ratio: "1:1",
+                alliance: "other",
+                minimumTransfer: 1000,
+                transferTime: "Instant",
+                searchable: true,
+                api: "hawaiian"
+            }
+        ];
+
+        let tripType = 'oneway';
+        let cabinClass = 'economy';
+        let searchStartTime;
+        let searchResults = [];
+
+        // Form submission
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            performLiveSearch();
+        });
+
+        function setTripType(type) {
+            tripType = type;
+            document.querySelectorAll('.option-toggle button').forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(type) || 
+                    (type === 'oneway' && btn.textContent.toLowerCase().includes('one way')) ||
+                    (type === 'roundtrip' && btn.textContent.toLowerCase().includes('round trip'))) {
+                    btn.classList.add('active');
+                } else if (btn.textContent.toLowerCase().includes('one way') || btn.textContent.toLowerCase().includes('round trip')) {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Show/hide return date
+            const returnDateGroup = document.getElementById('returnDateGroup');
+            if (type === 'roundtrip') {
+                returnDateGroup.style.display = 'block';
+                document.getElementById('returnDate').required = true;
+            } else {
+                returnDateGroup.style.display = 'none';
+                document.getElementById('returnDate').required = false;
+            }
+        }
+
+        function setCabinClass(cabin) {
+            cabinClass = cabin;
+            document.querySelectorAll('.option-toggle button').forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                if (text === cabin || (cabin === 'economy' && text === 'economy') || 
+                    (cabin === 'business' && text === 'business') || 
+                    (cabin === 'first' && text === 'first')) {
+                    btn.classList.add('active');
+                } else if (text === 'economy' || text === 'business' || text === 'first') {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        async function performLiveSearch() {
+            const origin = document.getElementById('origin').value.toUpperCase();
+            const destination = document.getElementById('destination').value.toUpperCase();
+            const departDate = document.getElementById('departDate').value;
+            const returnDate = document.getElementById('returnDate').value;
+
+            // Show results section immediately
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('resultsSummary').style.display = 'block';
+            
+            // Smooth scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Reset stats
+            searchStartTime = Date.now();
+            updateStats(0, 0, null);
+            
+            // Create partner cards
+            const partnersGrid = document.getElementById('partnersGrid');
+            partnersGrid.innerHTML = '';
+            
+            // Initialize all partner cards
+            amexPartners.forEach(partner => {
+                const card = createPartnerCard(partner);
+                partnersGrid.appendChild(card);
+            });
+            
+            // Start parallel searches
+            searchResults = [];
+            const searchPromises = amexPartners.map(partner => searchPartner(partner, origin, destination, departDate, returnDate));
+            
+            // Wait for all searches to complete
+            await Promise.allSettled(searchPromises);
+            
+            // Update final stats
+            const searchTime = ((Date.now() - searchStartTime) / 1000).toFixed(1);
+            document.getElementById('searchTime').textContent = `${searchTime}s`;
+        }
+
+        function createPartnerCard(partner) {
+            const card = document.createElement('div');
+            card.className = 'partner-card loading';
+            card.id = `partner-${partner.code}`;
+            
+            const allianceColors = {
+                'oneworld': '#e11d48',
+                'staralliance': '#eab308',
+                'skyteam': '#3b82f6',
+                'other': '#6366f1'
+            };
+            
+            card.innerHTML = `
+                <div class="partner-header">
+                    <h3 class="partner-name">${partner.name}</h3>
+                    <div class="search-status status-searching">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="0">
+                                <animate attributeName="stroke-dashoffset" from="0" to="60" dur="1s" repeatCount="indefinite"/>
+                            </circle>
+                        </svg>
+                        <span>Searching...</span>
+                    </div>
+                </div>
+                
+                <div class="transfer-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Transfer Ratio</span>
+                        <span class="detail-value">${partner.ratio}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Minimum Transfer</span>
+                        <span class="detail-value">${partner.minimumTransfer.toLocaleString()} points</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Transfer Time</span>
+                        <span class="detail-value">${partner.transferTime}</span>
+                    </div>
+                </div>
+                
+                <div class="flight-results">
+                    <div class="skeleton skeleton-text" style="width: 80%;"></div>
+                    <div class="skeleton skeleton-text" style="width: 60%;"></div>
+                    <div class="skeleton skeleton-button" style="margin-top: 16px;"></div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        async function searchPartner(partner, origin, destination, departDate, returnDate) {
+            const card = document.getElementById(`partner-${partner.code}`);
+            
+            try {
+                // Simulate API call with realistic delay
+                const delay = Math.random() * 3000 + 2000; // 2-5 seconds
+                await new Promise(resolve => setTimeout(resolve, delay));
+                
+                // Generate results based on partner and route
+                const results = await generateDynamicResults(partner, origin, destination, departDate, cabinClass);
+                
+                if (results.length > 0) {
+                    updatePartnerCard(card, partner, results, 'success');
+                    searchResults.push(...results);
+                    updateStats(
+                        document.querySelectorAll('.partner-card:not(.loading)').length,
+                        searchResults.length,
+                        Math.min(...searchResults.map(r => r.points))
+                    );
+                } else {
+                    updatePartnerCard(card, partner, [], 'no-availability');
+                }
+                
+            } catch (error) {
+                updatePartnerCard(card, partner, [], 'error');
+            }
+        }
+
+        async function generateDynamicResults(partner, origin, destination, date, cabin) {
+            // In production, this would call actual airline APIs
+            // For demo, we'll create realistic results based on route characteristics
+            
+            const routeDistance = calculateRouteDistance(origin, destination);
+            const isPopularRoute = checkPopularRoute(origin, destination);
+            const isDomestic = checkDomestic(origin, destination);
+            
+            // Availability varies by partner and route
+            const availabilityChance = {
+                'DL': isDomestic ? 0.8 : 0.6,
+                'AF': !isDomestic ? 0.7 : 0.3,
+                'BA': 0.6,
+                'VS': !isDomestic ? 0.5 : 0.2,
+                'EK': routeDistance > 3000 ? 0.6 : 0.1,
+                'SQ': routeDistance > 2000 ? 0.7 : 0.3,
+                'AC': 0.5,
+                'AV': 0.6,
+                'CX': routeDistance > 2000 ? 0.6 : 0.3,
+                'EY': routeDistance > 3000 ? 0.5 : 0.2,
+                'B6': isDomestic ? 0.7 : 0.4,
+                'HA': origin.includes('HI') || destination.includes('HI') ? 0.9 : 0.3
+            };
+            
+            const hasAvailability = Math.random() < (availabilityChance[partner.code] || 0.5);
+            
+            if (!hasAvailability) return [];
+            
+            // Calculate points based on distance and cabin
+            const basePoints = {
+                economy: Math.round(routeDistance * 5 + 5000),
+                business: Math.round(routeDistance * 12 + 20000),
+                first: Math.round(routeDistance * 20 + 40000)
+            };
+            
+            // Partner-specific adjustments
+            const partnerMultipliers = {
+                'DL': 1.2,  // Delta typically higher
+                'AF': 0.8,  // Flying Blue good value
+                'BA': isDomestic ? 0.7 : 1.3,  // BA good for short haul
+                'VS': 0.9,
+                'AV': 0.75, // LifeMiles good value
+                'B6': 1.1
+            };
+            
+            const multiplier = partnerMultipliers[partner.code] || 1;
+            const points = Math.round(basePoints[cabin] * multiplier);
+            
+            // Adjust for transfer ratio
+            const adjustedPoints = partner.ratio === "1.25:1" ? Math.round(points * 0.8) : points;
+            
+            const results = [];
+            
+            // Generate flight options
+            const numOptions = Math.floor(Math.random() * 3) + 1;
+            
+            for (let i = 0; i < numOptions; i++) {
+                const stops = routeDistance < 1000 ? 0 : Math.floor(Math.random() * 2);
+                const availability = isPopularRoute && i === 0 ? 'Limited' : 'Good';
+                
+                results.push({
+                    partner: partner.name,
+                    partnerCode: partner.code,
+                    cabin: cabin.charAt(0).toUpperCase() + cabin.slice(1),
+                    points: adjustedPoints + (i * 5000),
+                    stops: stops,
+                    availability: availability,
+                    aircraft: getAircraftType(routeDistance),
+                    duration: calculateDuration(routeDistance, stops)
+                });
+            }
+            
+            return results;
+        }
+
+        function calculateRouteDistance(origin, destination) {
+            // Simplified distance calculation based on common routes
+            const domesticCodes = ['LAX', 'JFK', 'ORD', 'DFW', 'ATL', 'SFO', 'MIA', 'SEA', 'BOS', 'DEN'];
+            const europeCodes = ['LHR', 'CDG', 'FRA', 'AMS', 'MAD', 'FCO', 'MUC', 'ZRH'];
+            const asiaCodes = ['NRT', 'HKG', 'SIN', 'ICN', 'PVG', 'BKK', 'DEL'];
+            
+            if (domesticCodes.includes(origin) && domesticCodes.includes(destination)) {
+                return Math.floor(Math.random() * 2000) + 500;
+            } else if (
+                (domesticCodes.includes(origin) && europeCodes.includes(destination)) ||
+                (europeCodes.includes(origin) && domesticCodes.includes(destination))
+            ) {
+                return Math.floor(Math.random() * 2000) + 3000;
+            } else if (
+                (domesticCodes.includes(origin) && asiaCodes.includes(destination)) ||
+                (asiaCodes.includes(origin) && domesticCodes.includes(destination))
+            ) {
+                return Math.floor(Math.random() * 3000) + 5000;
+            }
+            
+            return Math.floor(Math.random() * 4000) + 1000;
+        }
+
+        function checkPopularRoute(origin, destination) {
+            const popularRoutes = [
+                'JFK-LHR', 'LAX-NRT', 'SFO-HKG', 'ORD-CDG', 'JFK-CDG',
+                'LAX-SYD', 'SFO-LHR', 'BOS-LHR', 'MIA-GRU', 'JFK-FRA'
+            ];
+            return popularRoutes.includes(`${origin}-${destination}`) || 
+                   popularRoutes.includes(`${destination}-${origin}`);
+        }
+
+        function checkDomestic(origin, destination) {
+            const usCodes = ['LAX', 'JFK', 'ORD', 'DFW', 'ATL', 'SFO', 'MIA', 'SEA', 'BOS', 'DEN', 
+                           'PHX', 'LAS', 'MCO', 'EWR', 'MSP', 'DTW', 'PHL', 'CLT', 'IAH', 'DCA'];
+            return usCodes.includes(origin) && usCodes.includes(destination);
+        }
+
+        function getAircraftType(distance) {
+            if (distance < 1500) return 'A320/B737';
+            if (distance < 3500) return 'A330/B787';
+            return 'A350/B777';
+        }
+
+        function calculateDuration(distance, stops) {
+            const baseHours = distance / 500;
+            const stopTime = stops * 2;
+            const totalHours = baseHours + stopTime;
+            const hours = Math.floor(totalHours);
+            const minutes = Math.round((totalHours - hours) * 60);
+            return `${hours}h ${minutes}m`;
+        }
+
+        function updatePartnerCard(card, partner, results, status) {
+            card.classList.remove('loading');
+            
+            const statusElement = card.querySelector('.search-status');
+            
+            if (status === 'success') {
+                statusElement.className = 'search-status status-complete';
+                statusElement.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>${results.length} flights found</span>
+                `;
+                
+                const resultsHtml = results.map(flight => `
+                    <div class="flight-option" onclick="selectFlight('${partner.code}', ${flight.points})">
+                        <div class="flight-header">
+                            <span class="cabin-class">${flight.cabin}</span>
+                            <span class="points-cost">${flight.points.toLocaleString()} pts</span>
+                        </div>
+                        <div class="flight-meta">
+                            <span>• ${flight.stops === 0 ? 'Nonstop' : flight.stops + ' stop' + (flight.stops > 1 ? 's' : '')}</span>
+                            <span>• ${flight.availability} availability</span>
+                            <span>• ${flight.duration}</span>
+                        </div>
+                        <div class="flight-meta" style="margin-top: 8px;">
+                            <span>Aircraft: ${flight.aircraft}</span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                card.querySelector('.flight-results').innerHTML = `
+                    <div class="flight-options">
+                        ${resultsHtml}
+                    </div>
+                `;
+                
+            } else if (status === 'no-availability') {
+                card.classList.add('no-availability');
+                statusElement.className = 'search-status';
+                statusElement.innerHTML = `<span>No availability</span>`;
+                card.querySelector('.flight-results').innerHTML = `
+                    <div class="no-flights">
+                        No ${cabinClass} award space available on this route
+                    </div>
+                `;
+                
+            } else if (status === 'error') {
+                statusElement.className = 'search-status status-error';
+                statusElement.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>Search failed</span>
+                `;
+                card.querySelector('.flight-results').innerHTML = `
+                    <div class="error-message">
+                        Unable to search this partner. Please try again later.
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats(partnersSearched, flightsFound, bestValue) {
+            document.getElementById('partnersSearched').textContent = partnersSearched;
+            document.getElementById('flightsFound').textContent = flightsFound;
+            document.getElementById('bestValue').textContent = bestValue ? bestValue.toLocaleString() : '-';
+            
+            if (searchStartTime) {
+                const elapsed = ((Date.now() - searchStartTime) / 1000).toFixed(1);
+                document.getElementById('searchTime').textContent = `${elapsed}s`;
+            }
+        }
+
+        function selectFlight(partnerCode, points) {
+            alert(`Selected flight on ${partnerCode} for ${points.toLocaleString()} points.\n\nIn production, this would:\n1. Check real-time availability\n2. Show transfer instructions\n3. Redirect to booking`);
+        }
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('departDate').min = today;
+        document.getElementById('returnDate').min = today;
+
+        // Add sample searches
+        window.addEventListener('load', () => {
+            // Pre-fill with sample route
+            document.getElementById('origin').value = 'JFK';
+            document.getElementById('destination').value = 'LHR';
+            document.getElementById('departDate').value = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>
