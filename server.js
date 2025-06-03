@@ -1,5 +1,6 @@
 // server.js  ────────────────────────────────────────────────────────────────
 import express from 'express';
+// Modules for the old scraping approach (left for reference)
 import * as cheerio from 'cheerio';
 import { exec as _exec } from 'child_process';
 import { promisify } from 'util';
@@ -48,6 +49,56 @@ const partners = [
   },
 ];
 
+// Simplified dynamic result generator used in place of real scraping
+function calculateRouteDistance(origin, destination) {
+  const domesticCodes = ['LAX','JFK','ORD','DFW','ATL','SFO','MIA','SEA','BOS','DEN'];
+  const europeCodes = ['LHR','CDG','FRA','AMS','MAD','FCO','MUC','ZRH'];
+  const asiaCodes   = ['NRT','HKG','SIN','ICN','PVG','BKK','DEL'];
+
+  if (domesticCodes.includes(origin) && domesticCodes.includes(destination)) {
+    return Math.floor(Math.random() * 2000) + 500;
+  }
+  if ((domesticCodes.includes(origin) && europeCodes.includes(destination)) ||
+      (europeCodes.includes(origin) && domesticCodes.includes(destination))) {
+    return Math.floor(Math.random() * 2000) + 3000;
+  }
+  if ((domesticCodes.includes(origin) && asiaCodes.includes(destination)) ||
+      (asiaCodes.includes(origin) && domesticCodes.includes(destination))) {
+    return Math.floor(Math.random() * 3000) + 5000;
+  }
+  return Math.floor(Math.random() * 4000) + 1000;
+}
+
+function generateDynamicResults(partner, origin, destination, cabin) {
+  const distance = calculateRouteDistance(origin, destination);
+  const basePoints = {
+    economy: Math.round(distance * 5 + 5000),
+    business: Math.round(distance * 12 + 20000),
+    first: Math.round(distance * 20 + 40000)
+  };
+
+  const multiplier = 1;
+  const points = Math.round(basePoints[cabin] * multiplier);
+  const adjusted = partner.ratio === '1.25:1' ? Math.round(points * 0.8) : points;
+
+  const options = Math.floor(Math.random() * 3) + 1;
+  const results = [];
+  for (let i = 0; i < options; i++) {
+    const stops = distance < 1000 ? 0 : Math.floor(Math.random() * 2);
+    results.push({
+      partner: partner.name,
+      partnerCode: partner.code,
+      cabin: cabin.charAt(0).toUpperCase() + cabin.slice(1),
+      points: adjusted + i * 5000,
+      stops,
+      availability: 'Good',
+      aircraft: distance < 1500 ? 'A320/B737' : (distance < 3500 ? 'A330/B787' : 'A350/B777'),
+      duration: `${Math.floor(distance/500 + stops*2)}h ${Math.round(((distance/500 + stops*2)%1)*60)}m`
+    });
+  }
+  return results;
+}
+
 /**
  * Basic scraper that curls the partner site and extracts data.
  * The CSS selectors here are placeholders—update them for each airline.
@@ -80,7 +131,7 @@ async function scrapePartner(partner, params) {
 
 // ── API endpoint ───────────────────────────────────────────────────────────
 app.post('/search', async (req, res) => {
-  const { origin, destination, date, partnerCode } = req.body;
+  const { origin, destination, cabin = 'economy', partnerCode } = req.body;
   const searchPartners = partnerCode
     ? partners.filter(p => p.code === partnerCode)
     : partners;
@@ -88,19 +139,15 @@ app.post('/search', async (req, res) => {
   const results = [];
 
   for (const partner of searchPartners) {
-    try {
-      const flights = await scrapePartner(partner, { origin, destination, date });
-      results.push(...flights);
-    } catch (err) {
-      console.error(`Failed to scrape ${partner.name}:`, err.message);
-    }
+    const flights = generateDynamicResults(partner, origin, destination, cabin);
+    results.push(...flights);
   }
 
   res.json({ results });
 });
 
-// ⬇️ OPTIONAL: make “/” go straight to v1.html for convenience
-app.get('/', (_, res) => res.redirect('/v1.html'));
+// Redirect the root to the landing page
+app.get('/', (_, res) => res.redirect('/index.html'));
 
 // ── Launch server ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000;
