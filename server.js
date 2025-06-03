@@ -4,6 +4,7 @@ import cheerio from 'cheerio';
 
 const app = express();
 app.use(express.json());
+app.use(express.static("."));
 
 /**
  * List of partner websites with placeholder URLs. These URLs should be
